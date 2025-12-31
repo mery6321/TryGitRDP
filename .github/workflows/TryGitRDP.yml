@@ -1,0 +1,30 @@
+name: TryGitRDP-Ultimate
+on: workflow_dispatch
+
+jobs:
+  rdp-session:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install Dependencies
+        run: |
+          pip install pyTelegramBotAPI psutil pyautogui pillow
+
+      - name: Install Chrome Remote Desktop
+        run: |
+          $URL = "https://dl.google.com/edgedl/chrome-remote-desktop/chromeremotedesktophost.msi"
+          Invoke-WebRequest $URL -OutFile "crd.msi"
+          Start-Process msiexec.exe -Wait -ArgumentList "/i crd.msi /qn"
+
+      - name: Run Bot Master
+        env:
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
+          TG_CHATID: ${{ secrets.TG_CHATID }}
+        run: python bot_master.py
